@@ -264,6 +264,12 @@ class cncPathClass:
 
     return False
 
+  def __str__(self):
+    val = ""
+    for point3D in self.points3D:
+      val = val + "," + str(point3D)
+    return val
+
   def lineTabIntersections(self, lineStart, lineEnd):
     #returns a list of lists containing intersections of a line within a single tab.
     #eg, a line could intersect 2 tabs, and therefore have a list of 2 elements, each containing a list of intersecting points within those two tabs
@@ -904,7 +910,10 @@ class cncGcodeGeneratorClass:
 
   def Generate(self):
     for cncPath in self.cncPaths.cncPaths:  
-      print("NEW PATH")
+      print()
+      print()
+      print()
+      print("NEW PATH: " + str(cncPath))
       #########################################################
       #Cut each path, one depth of cut at a time
       #########################################################
@@ -931,6 +940,10 @@ class cncGcodeGeneratorClass:
           nextHeight = self.tabHeight
         else:
           nextHeight = height
+        if self.location.X != None:
+          print("first point: " + str(cncPath.points3D[0]))
+          print("curr loc:    " + str(self.location))
+          print("     distance: " + str(distanceXY(cncPath.points3D[0], self.location)))
         if self.location.X == None or self.location.Y == None or \
            distanceXY(cncPath.points3D[0], self.location) > 0.001:
           self.moveUpandDownToNextLocation(cncPath.points3D[0], nextHeight)
@@ -940,11 +953,12 @@ class cncGcodeGeneratorClass:
         #########################################################
         #Cycle through the points in the cncPath
         #########################################################
-        prevPoint = cncPath.points3D[0]
+        #prevPoint = cncPath.points3D[0]
         for i, point in enumerate(cncPath.points3D):
           #########################################################
           #Move tool to next point
           #########################################################
+          print("POINT: " + str(point))
           if distanceXY(point, self.location):
             self.XYMove(point)
           #if below tab height and point is start of a tab, then move to tab height
@@ -954,9 +968,10 @@ class cncGcodeGeneratorClass:
           if heightBelowTab and cncPath.isPointTabEnd(i):
             self.ZMove(height)
 
-          prevPoint = point
+          #prevPoint = point
 
   def cutTabs(self):
+    print("CUT TABS")
     for cncPath in self.cncPaths.cncPaths:  
       totalDistance = 0
       cutSpacing = (cncPath.tabWidth + cncPath.cutterDiameter) / 5.0
@@ -992,23 +1007,24 @@ class cncGcodeGeneratorClass:
       outFile.write('\n'.join(str(g) for g in self.gCodes))
 
   def moveUpandDownToNextLocation(self, newLocation, depth):
-    #print()
-    #print("move up and down " + str(newLocation) + " depth " + str(depth))
+    print()
+    print("move up and down " + str(newLocation) + " depth " + str(depth))
     
     self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
     self.gCodes.append(GCodeRapidMove(X=newLocation.X, Y=newLocation.Y))
     self.gCodes.append(GCodeLinearMove(Z=depth))
-    self.location = newLocation
+    self.location.X = newLocation.X
+    self.location.Y = newLocation.Y
     self.location.Z = depth
 
   def ZMove(self, depth):
-    #print()
-    #print("Move to Depth " + str(depth))
+    print()
+    print("Move to Depth " + str(depth))
     self.gCodes.append(GCodeLinearMove(Z=depth))
     self.location.Z = depth
   def XYMove(self, newLocation):
-    #print()
-    #print("Move to next location " + str(newLocation))
+    print()
+    print("Move to next location " + str(newLocation))
     self.gCodes.append(GCodeLinearMove(X=newLocation.X, Y=newLocation.Y))
     self.location.X = newLocation.X
     self.location.Y = newLocation.Y
