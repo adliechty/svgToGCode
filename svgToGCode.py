@@ -488,7 +488,7 @@ class cncPathClass:
       #Then indicate the tab already exists.
       if self.XTabsOnSameSide(location, XtabLocation) and \
          abs(XtabLocation.X - location.X) < self.distPerTab / 2.0:
-        print("alreadyTab at  " + str(XtabLocation) + " proposed: " + str(location))
+        #print("alreadyTab at  " + str(XtabLocation) + " proposed: " + str(location))
         alreadyTab = True
         break
     
@@ -746,10 +746,6 @@ class cncPathsClass:
      colors = []
 
      for path, attribute in zip(paths, attributes):
-       print(path)
-       print(attribute)
-       print(attribute['style'])
-       print()
        if 'stroke' in attribute.keys():
          nextColor = hex_to_rgb(attribute['stroke'])
        elif 'style' in attribute.keys():
