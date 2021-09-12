@@ -965,6 +965,8 @@ class cncGcodeGeneratorClass:
             self.ZMove(height)
 
           #prevPoint = point
+    #At end of cuts go back to a safe height
+    self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
 
   def cutTabs(self):
     print("CUT TABS")
@@ -993,10 +995,12 @@ class cncGcodeGeneratorClass:
             #print()
             if len(cutLocation) == 1:
               cutLocation = cutLocation[0]
-              self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness)
+              self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial)
               startPoint = cutLocation
 
             nextCutDistance = nextCutDistance + cutSpacing
+    #At end of cutting tabs go back to a safe height
+    self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
 
   def Save(self, fileName):
     with open(fileName, "w") as outFile:
