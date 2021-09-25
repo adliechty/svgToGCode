@@ -906,10 +906,10 @@ class cncGcodeGeneratorClass:
 
   def Generate(self):
     for cncPath in self.cncPaths.cncPaths:  
-      print()
-      print()
-      print()
-      print("NEW PATH: " + str(cncPath))
+      #print()
+      #print()
+      #print()
+      #print("NEW PATH: " + str(cncPath))
       #########################################################
       #Cut each path, one depth of cut at a time
       #########################################################
@@ -936,16 +936,16 @@ class cncGcodeGeneratorClass:
           nextHeight = self.tabHeight
         else:
           nextHeight = height
-        if self.location.X != None:
-          print("first point: " + str(cncPath.points3D[0]))
-          print("curr loc:    " + str(self.location))
-          print("     distance: " + str(distanceXY(cncPath.points3D[0], self.location)))
+        #if self.location.X != None:
+          #print("first point: " + str(cncPath.points3D[0]))
+          #print("curr loc:    " + str(self.location))
+          #print("     distance: " + str(distanceXY(cncPath.points3D[0], self.location)))
         if self.location.X == None or self.location.Y == None or \
            distanceXY(cncPath.points3D[0], self.location) > 0.001:
           self.moveUpandDownToNextLocation(cncPath.points3D[0], nextHeight)
         else:
           self.ZMove(nextHeight)
-        print("NEXT HEIGHT:" + str(nextHeight))
+        #print("NEXT HEIGHT:" + str(nextHeight))
         #########################################################
         #Cycle through the points in the cncPath
         #########################################################
@@ -954,13 +954,13 @@ class cncGcodeGeneratorClass:
           #########################################################
           #Move tool to next point
           #########################################################
-          print("POINT: " + str(point))
+          #print("POINT: " + str(point))
           if distanceXY(point, self.location):
             self.XYMove(point)
           #if below tab height and point is start of a tab, then move to tab height
           if heightBelowTab and cncPath.isPointTabStart(i):
             self.ZMove(self.tabHeight - self.materialThickness)
-            print("TAB: " + str(self.tabHeight - self.materialThickness))
+            #print("TAB: " + str(self.tabHeight - self.materialThickness))
           if heightBelowTab and cncPath.isPointTabEnd(i):
             self.ZMove(height)
 
@@ -1007,8 +1007,8 @@ class cncGcodeGeneratorClass:
       outFile.write('\n'.join(str(g) for g in self.gCodes))
 
   def moveUpandDownToNextLocation(self, newLocation, depth):
-    print()
-    print("move up and down " + str(newLocation) + " depth " + str(depth))
+    #print()
+    #print("move up and down " + str(newLocation) + " depth " + str(depth))
     
     self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
     self.gCodes.append(GCodeRapidMove(X=newLocation.X, Y=newLocation.Y))
@@ -1018,13 +1018,13 @@ class cncGcodeGeneratorClass:
     self.location.Z = depth
 
   def ZMove(self, depth):
-    print()
-    print("Move to Depth " + str(depth))
+    #print()
+    #print("Move to Depth " + str(depth))
     self.gCodes.append(GCodeLinearMove(Z=depth))
     self.location.Z = depth
   def XYMove(self, newLocation):
-    print()
-    print("Move to next location " + str(newLocation))
+    #print()
+    #print("Move to next location " + str(newLocation))
     self.gCodes.append(GCodeLinearMove(X=newLocation.X, Y=newLocation.Y))
     self.location.X = newLocation.X
     self.location.Y = newLocation.Y
@@ -1058,4 +1058,6 @@ cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
                                           )
 cncGcodeGenerator.Generate()
 cncGcodeGenerator.cutTabs()
-cncGcodeGenerator.Save(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")
+if not os.path.exists(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode")):
+    os.makedirs(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode"))
+cncGcodeGenerator.Save(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode", os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")))
