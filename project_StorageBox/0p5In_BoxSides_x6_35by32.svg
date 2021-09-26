@@ -25,15 +25,15 @@
      guidetolerance="10"
      inkscape:pageopacity="0"
      inkscape:pageshadow="2"
-     inkscape:window-width="1920"
-     inkscape:window-height="1017"
+     inkscape:window-width="1680"
+     inkscape:window-height="987"
      id="namedview934"
      showgrid="false"
-     inkscape:zoom="0.25000001"
-     inkscape:cx="545.99999"
-     inkscape:cy="2045.9999"
-     inkscape:window-x="1672"
-     inkscape:window-y="-8"
+     inkscape:zoom="0.1767767"
+     inkscape:cx="1507.5516"
+     inkscape:cy="692.96462"
+     inkscape:window-x="-8"
+     inkscape:window-y="18"
      inkscape:window-maximized="1"
      inkscape:current-layer="svg932"
      inkscape:document-rotation="0"
@@ -128,41 +128,6 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      id="text927-6-8-6-2"
      x="589.00317"
      y="-142.25526" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2624px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 2.8998743,91.6322 858.4037957,0"
-     id="path975"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.261519px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 0,196.98076 861.95848,0"
-     id="path977"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2613px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 2.245064,302.06565 H 862.14557"
-     id="path979"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2613px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 13.449878,342.74644 848.581642,0"
-     id="path979-8"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2613px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 13.449235,251.88332 848.488095,0"
-     id="path979-8-7"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2613px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="m 13.151294,144.36525 848.768736,0"
-     id="path979-8-3"
-     sodipodi:nodetypes="cc" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.2613px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 12.795076,55.378241 H 861.93798"
-     id="path979-8-8"
-     sodipodi:nodetypes="cc" />
   <g
      transform="rotate(90,-26.0875,170.7625)"
      id="text1146"
@@ -250,4 +215,53 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      stroke-width="6.35"
      id="path885-61-5"
      style="fill:none;stroke-linecap:round;stroke-linejoin:round" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.095647;stroke-opacity:1"
+     id="rect994"
+     width="847.50043"
+     height="1.9687432"
+     x="13.46202"
+     y="53.411655" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0956848;stroke-opacity:1"
+     id="rect994-2"
+     width="848.16956"
+     height="1.9687432"
+     x="13.151294"
+     y="142.3965" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0962739;stroke-opacity:1"
+     id="rect994-2-8"
+     width="858.96771"
+     height="1.9680045"
+     x="2.6718626"
+     y="195.01237" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0956848;stroke-opacity:1"
+     id="rect994-2-8-5"
+     width="848.16956"
+     height="1.9687432"
+     x="13.449235"
+     y="249.91457" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0956848;stroke-opacity:1"
+     id="rect994-2-8-5-9"
+     width="848.16956"
+     height="1.9687432"
+     x="13.449878"
+     y="340.77768" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0962366;stroke-opacity:1"
+     id="rect994-9"
+     width="858.2218"
+     height="1.9681913"
+     x="3.3449934"
+     y="89.649483" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0962366;stroke-opacity:1"
+     id="rect994-9-9"
+     width="858.2218"
+     height="1.9681913"
+     x="2.245064"
+     y="300.09744" />
 </svg>

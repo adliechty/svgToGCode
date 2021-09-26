@@ -242,7 +242,7 @@ class cncPathClass:
     self.signedArea = signedArea(path, pointsPerCurve)
     self.isClockWise = self.signedArea > 0
     self.boundingBox = findBoundingBox(path)
-    print("BOUNDING BOX: " + str(self.boundingBox))
+    print("    BOUNDING BOX: " + str(self.boundingBox))
     self.height = self.boundingBox[1].Y - self.boundingBox[0].Y
     self.width = self.boundingBox[1].X - self.boundingBox[0].X
     self.idealXTabPositions = []
@@ -579,8 +579,8 @@ class cncPathClass:
           intersection = lineIntersection(Point3D(XtabLocation.X, XtabLocation.Y - self.tabWidth * 4.0) , Point3D(XtabLocation.X, XtabLocation.Y + self.tabWidth * 4.0), prevPoint, point)
           #Don't add the tab if intersection not found or intersection is for opposite side of part
           if intersection and self.XTabsOnSameSide(intersection, XtabLocation):
-            print("      Attempting Adjacent Tab" )
-            print("      XtabLocation: " + str(XtabLocation) + " intersection: " + str(intersection))
+            #print("      Attempting Adjacent Tab" )
+            #print("      XtabLocation: " + str(XtabLocation) + " intersection: " + str(intersection))
             self.addXTabIfNoneAlready(intersection)
             break
           prevPoint = point
@@ -627,7 +627,7 @@ class cncPathClass:
       prevPoint = point
 
 
-    print("initial:" + str(location) + "bestTabLocation: " + str(bestTabLocation))
+    #print("initial:" + str(location) + "bestTabLocation: " + str(bestTabLocation))
     return bestTabLocation
 
   def idealToActualYTabLocation(self, location, locationOnMaxSide):
@@ -673,7 +673,7 @@ class cncPathClass:
     #Add XTabs at the ideal location if a tab already doesn't exist in that location
     #Prior to calling this, addXTabsIfAdjacentTab should be called to give priority to already adjacent locations
 
-    print("addXTabsWhereNoneAlready****************************************")
+    print("    addXTabsWhereNoneAlready")
     for idealXTabPosition in self.idealXTabPositions:
       #For each tab location only choose top most and bottom most location as those will be outer most portions of the part
       maxPoint = None
@@ -703,6 +703,7 @@ class cncPathClass:
         self.addXTabIfNoneAlready(actualLocation)
 
   def addYTabsWhereNoneAlread(self):
+    print("    addYTabsWhereNoneAlready")
     #Add XTabs at the ideal location if a tab already doesn't exist in that location
     #Prior to calling this, addXTabsIfAdjacentTab should be called to give priority to already adjacent locations
     prevPoint = self.points3D[0]
@@ -755,13 +756,14 @@ class cncPathsClass:
          else:
            nextColor = (0,0,0)
        colors.append(list(nextColor))
-     print()
-     print()
-     print(colors)
+     #print()
+     #print()
+     #print(colors)
+     #print(paths)
          
      self.attributes = attributes
      self.svg_attributes = svg_attributes
-     print(len(paths))
+     print("CNC Paths: " + str(len(paths)))
      #####################################################################
      #Create a cncPath out of each svgPath to store the svg path and other information
      #####################################################################
@@ -789,7 +791,7 @@ class cncPathsClass:
      self.pointsPerCurve = pointsPerCurve
      self.distPerTab = distPerTab
   def ToSvgFile(self, fileName):
-    print("ToSvgFile")
+    print("Saving cut paths to: " + fileName)
     paths = []
     attributes = []
     svg_attributes = []
@@ -800,7 +802,7 @@ class cncPathsClass:
       attributes.append({'fill':'none', 'stroke': 'rgb(0,0,0)', 'stroke-width': '0.5'})
       #svg_attributes.append({})
     
-    print("*******************")
+    #print("*******************")
     #for cncPath in self.cncPaths:
     #  tabPaths = cncPath.cncTabsToPaths()
     #  for path in tabPaths:
@@ -821,6 +823,7 @@ class cncPathsClass:
 
     wsvg(paths, attributes=attributes, svg_attributes=self.svg_attributes, filename=fileName)
   def orderCncHolePathsFirst(self):
+    print("Order CNC Hole Paths First")
     #Order cuts from inside holes to outside paths
     orderedPaths = []
     for path in self.cncPaths:
@@ -832,11 +835,25 @@ class cncPathsClass:
         orderedPaths.append(path)
 
     self.cncPaths = orderedPaths  
+
+  def orderPartialCutsFirst(self):
+    print("Order Partial cuts through material first")
+    orderedPaths = []
+    for path in self.cncPaths:
+      if path.color[1] != 0:
+        orderedPaths.append(path)
+
+    for path in self.cncPaths:
+      if path.color[1] == 0:
+        orderedPaths.append(path)
+
   def ModifyPointsFromTabLocations(self):
+    print("Adding points to paths for tabs")
     for path in self.cncPaths:
       path.ModifyPointsFromTabLocations()
 
   def addTabs(self):
+    print("Adding Tabs")
     sortedByWidth = sorted(self.cncPaths, key=lambda x: x.width)
     sortedByHeight = sorted(self.cncPaths, key=lambda x: x.height)
     i = 0
@@ -899,12 +916,13 @@ class cncGcodeGeneratorClass:
     passes = cutDepth / idealDepthPerPass
     #If depth per pass does not end at end of material thickness, then adjust depth per pass so all passes are even
     if passes - math.floor(passes) > 0.001:
-      print("New Depth Per Pass: " + str( cutDepth / math.ceil(passes)))
+      #print("    New Depth Per Pass: " + str( cutDepth / math.ceil(passes)))
       return cutDepth / math.ceil(passes)
-    print("New Depth Per Pass: " + str(idealDepthPerPass))
+    #print("New Depth Per Pass: " + str(idealDepthPerPass))
     return idealDepthPerPass
 
   def Generate(self):
+    print("Generating G Code")
     for cncPath in self.cncPaths.cncPaths:  
       #print()
       #print()
@@ -913,7 +931,7 @@ class cncGcodeGeneratorClass:
       #########################################################
       #Cut each path, one depth of cut at a time
       #########################################################
-      #If this is not a green line (green is 0) then this means cut all the way through the material
+      #If this is not a green line (green is >0) then this means cut all the way through the material
       if cncPath.color[1] == 0:
         cutThickness = self.materialThickness + self.depthBelowMaterial
       else:
@@ -969,7 +987,7 @@ class cncGcodeGeneratorClass:
     self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
 
   def cutTabs(self):
-    print("CUT TABS")
+    print("  Add G code to cut tabs")
     for cncPath in self.cncPaths.cncPaths:  
       totalDistance = 0
       cutSpacing = (cncPath.tabWidth + cncPath.cutterDiameter) / 5.0
@@ -1003,6 +1021,7 @@ class cncGcodeGeneratorClass:
     self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
 
   def Save(self, fileName):
+    print("Saving G code to: " + fileName)
     with open(fileName, "w") as outFile:
       outFile.write('\n'.join(str(g) for g in self.gCodes))
 
@@ -1043,6 +1062,7 @@ cncPaths = cncPathsClass(inputSvgFile   = args.inputSvgFile[0],
 
 #Order cuts from inside holes to outside borders
 cncPaths.orderCncHolePathsFirst()
+cncPaths.orderPartialCutsFirst()
 
 cncPaths.addTabs()
 cncPaths.ModifyPointsFromTabLocations()
