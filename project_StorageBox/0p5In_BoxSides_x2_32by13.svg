@@ -29,9 +29,9 @@
      inkscape:window-height="987"
      id="namedview934"
      showgrid="false"
-     inkscape:zoom="0.1767767"
-     inkscape:cx="602.45496"
-     inkscape:cy="1626.3456"
+     inkscape:zoom="1"
+     inkscape:cx="736.49998"
+     inkscape:cy="559.49999"
      inkscape:window-x="-8"
      inkscape:window-y="18"
      inkscape:window-maximized="1"
@@ -126,18 +126,6 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      id="text1146-0"
      x="584.54248"
      y="201.8132" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.151497px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 1.9952316e-5,91.63221 H 290.50002"
-     id="path975" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.150988px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 1.9952316e-5,196.98077 H 290.50002"
-     id="path977" />
-  <path
-     style="fill:none;stroke:#008000;stroke-width:0.150862px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
-     d="M 1.9952316e-5,302.06566 H 290.50002"
-     id="path979" />
   <text
      alignment-baseline="hanging"
      font-size="4px"
@@ -159,4 +147,25 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      stroke-width="6.35"
      id="path885-61"
      style="fill:none;stroke-linecap:round;stroke-linejoin:round" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0561512;stroke-opacity:1"
+     id="rect994"
+     width="286.34537"
+     height="2.0082388"
+     x="2.786602"
+     y="89.643723" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0561512;stroke-opacity:1"
+     id="rect994-2"
+     width="286.34537"
+     height="2.0082388"
+     x="2.80635"
+     y="194.97253" />
+  <rect
+     style="fill:none;stroke:#008000;stroke-width:0.0561512;stroke-opacity:1"
+     id="rect994-3"
+     width="286.34537"
+     height="2.0082388"
+     x="2.9466665"
+     y="300.05743" />
 </svg>

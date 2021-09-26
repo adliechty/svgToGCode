@@ -847,6 +847,8 @@ class cncPathsClass:
       if path.color[1] == 0:
         orderedPaths.append(path)
 
+    self.cncPaths = orderedPaths  
+
   def ModifyPointsFromTabLocations(self):
     print("Adding points to paths for tabs")
     for path in self.cncPaths:
@@ -986,7 +988,7 @@ class cncGcodeGeneratorClass:
     #At end of cuts go back to a safe height
     self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
 
-  def cutTabs(self):
+  def CutTabs(self):
     print("  Add G code to cut tabs")
     for cncPath in self.cncPaths.cncPaths:  
       totalDistance = 0
@@ -1013,7 +1015,7 @@ class cncGcodeGeneratorClass:
             #print()
             if len(cutLocation) == 1:
               cutLocation = cutLocation[0]
-              self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial)
+              self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial, 0.5)
               startPoint = cutLocation
 
             nextCutDistance = nextCutDistance + cutSpacing
@@ -1025,11 +1027,12 @@ class cncGcodeGeneratorClass:
     with open(fileName, "w") as outFile:
       outFile.write('\n'.join(str(g) for g in self.gCodes))
 
-  def moveUpandDownToNextLocation(self, newLocation, depth):
+  def moveUpandDownToNextLocation(self, newLocation, depth, safeHeight = None):
     #print()
     #print("move up and down " + str(newLocation) + " depth " + str(depth))
-    
-    self.gCodes.append(GCodeRapidMove(Z=self.safeHeight))
+    if safeHeight == None:
+      safeHeight = self.safeHeight
+    self.gCodes.append(GCodeRapidMove(Z=safeHeight))
     self.gCodes.append(GCodeRapidMove(X=newLocation.X, Y=newLocation.Y))
     self.gCodes.append(GCodeLinearMove(Z=depth))
     self.location.X = newLocation.X
@@ -1084,7 +1087,7 @@ cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
                                            tabHeight          = float(args.tabHeight[0])
                                           )
 cncGcodeGenerator.Generate()
-cncGcodeGenerator.cutTabs()
+cncGcodeGenerator.CutTabs()
 
 ############################
 # Save G code
