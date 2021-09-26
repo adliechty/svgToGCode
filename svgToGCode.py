@@ -1046,7 +1046,14 @@ cncPaths.orderCncHolePathsFirst()
 
 cncPaths.addTabs()
 cncPaths.ModifyPointsFromTabLocations()
-cncPaths.ToSvgFile(os.path.splitext(args.inputSvgFile[0])[0] + "_cutPaths.svg")
+
+############################
+# save cut paths to svg
+############################
+svgPath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_cutPaths")
+if not os.path.exists(svgPath):
+    os.makedirs(svgPath)
+cncPaths.ToSvgFile(os.path.join(svgPath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + "_cutPaths.svg")))
 
 cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
                                            materialThickness  = float(args.materialThickness[0]),
@@ -1058,6 +1065,11 @@ cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
                                           )
 cncGcodeGenerator.Generate()
 cncGcodeGenerator.cutTabs()
-if not os.path.exists(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode")):
-    os.makedirs(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode"))
-cncGcodeGenerator.Save(os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode", os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")))
+
+############################
+# Save G code
+############################
+gcodePath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode")
+if not os.path.exists(gcodePath):
+    os.makedirs(gcodePath)
+cncGcodeGenerator.Save(os.path.join(gcodePath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")))
