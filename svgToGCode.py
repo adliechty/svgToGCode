@@ -403,12 +403,12 @@ class cncPathClass:
       allTabIntersections = self.lineTabIntersections(prevPoint3D, point3D)
       #if point is within a tab, then mark it as a tab
       if self.PointWithinTab(point3D):
-        print("within tab: " + str(point3D))
+        #print("within tab: " + str(point3D))
         self.pointIsTab[i] = True
       #itterate through list of intersections within a single tab
       for tabIntersections in allTabIntersections:
         if len(tabIntersections) == 2:
-          print("2 tabIntersections")
+          #print("2 tabIntersections")
           #move to edge of tab
           self.pointIsTab.insert(i, True)
           self.points3D.insert(i, tabIntersections[0])
@@ -418,12 +418,12 @@ class cncPathClass:
           self.points3D.insert(i, tabIntersections[1])
           i = i + 1
         elif len(tabIntersections) == 1:
-          print("1 intersection")
+          #print("1 intersection")
           #move to edge of tab
           self.pointIsTab.insert(i, True)
           self.points3D.insert(i, tabIntersections[0])
           i = i + 1
-        print(tabIntersections)
+        #print(tabIntersections)
         #If no tabIntersections with tab, just continue on like normal from point to point
       i = i + 1
       prevPoint3D = point3D
@@ -463,13 +463,13 @@ class cncPathClass:
     if self.color[1] != 0:
       return
     self.XtabLocations.append(location)
-    print("added Tab: " + str(location) + "NumTabs: " + str(len(self.XtabLocations)))
+    #print("added Tab: " + str(location) + "NumTabs: " + str(len(self.XtabLocations)))
 
   def addYTab(self, location):
     if self.color[1] != 0:
       return
     self.YtabLocations.append(location)
-    print("************added Tab: " + str(location) + "NumTabs: " + str(len(self.YtabLocations)))
+    #print("************added Tab: " + str(location) + "NumTabs: " + str(len(self.YtabLocations)))
   
   def XTabOnMaxSide(self, l1):
     midY = (self.boundingBox[0].Y + self.boundingBox[1].Y) / 2.0
@@ -603,7 +603,7 @@ class cncPathClass:
     bestTabLocation = None
     prevPoint = self.points3D[-1]
     maxScore = -100000000000000000
-    print("TAB START: ", str(location))
+    #print("TAB START: ", str(location))
     for point in self.points3D:
       #Sweep the tab from beginning spacing to end spacing to find ideal location
       pointsToTry = 20.0
@@ -622,12 +622,12 @@ class cncPathClass:
           bBoxMiddle = (self.boundingBox[1].Y + self.boundingBox[0].Y) / 2.0
           bBoxWidth  = max(0.1, (self.boundingBox[1].Y - self.boundingBox[0].Y))
           vScore = (candPoint.Y - bBoxMiddle) / bBoxWidth
-          print("      CandPoint" + str(candPoint) + " boxMiddle" + str(bBoxMiddle) + " boxWidth" + str(bBoxWidth) + " boundingBox: " + str(self.boundingBox))
+          #print("      CandPoint" + str(candPoint) + " boxMiddle" + str(bBoxMiddle) + " boxWidth" + str(bBoxWidth) + " boundingBox: " + str(self.boundingBox))
           if not locationOnMaxSide:
             vScore = -vScore
           tabWidthAtMaterial = self.tabWidth + self.cutterDiameter
           tabNearCornerScore = min(distanceXY(candPoint, prevPoint) / (tabWidthAtMaterial / 2.0), distanceXY(candPoint, point) / (tabWidthAtMaterial / 2.0))
-          print("      tabNearCornerScore: " + str(tabNearCornerScore))
+          #print("      tabNearCornerScore: " + str(tabNearCornerScore))
           #Penalize heavily tab that is not completely away from a corner
           if tabNearCornerScore < 1:
             tabNearCornerScore = tabNearCornerScore / 10
@@ -635,7 +635,7 @@ class cncPathClass:
             tabNearCornerScore = 1
           #tabNearCornerScore = 1
           score = hScore * vScore * tabNearCornerScore
-          print("    score: " + str(score) + " hScore: " + str(hScore) + " vScore: " + str(vScore) + " tabNearCornerScore: " + str(tabNearCornerScore))
+          #print("    score: " + str(score) + " hScore: " + str(hScore) + " vScore: " + str(vScore) + " tabNearCornerScore: " + str(tabNearCornerScore))
           
           if bestTabLocation == None or score > maxScore:
             #print("****************Best found")
@@ -643,7 +643,7 @@ class cncPathClass:
             #print(bBoxWidth)
             #print(candPoint.imag)
             #print(locationOnMaxSide)
-            print("    Best above: " + str(candPoint))
+            #print("    Best above: " + str(candPoint))
             bestTabLocation = candPoint
             maxScore = score
       prevPoint = point
@@ -719,12 +719,12 @@ class cncPathClass:
       
       if maxPoint != None:
         actualLocation = self.idealToActualXTabLocation(maxPoint, True)
-        print("idealX:" + str(maxPoint) + "actual: " + str(actualLocation))
+        #print("idealX:" + str(maxPoint) + "actual: " + str(actualLocation))
         #print()
         self.addXTabIfNoneAlready(actualLocation)
       if minPoint != None and maxPoint != minPoint:
         actualLocation = self.idealToActualXTabLocation(minPoint, False)
-        print("idealX:" + str(minPoint) + "actual: " + str(actualLocation))
+        #print("idealX:" + str(minPoint) + "actual: " + str(actualLocation))
         #print()
         self.addXTabIfNoneAlready(actualLocation)
 
@@ -805,8 +805,6 @@ class cncPathsClass:
      #Create new bounding box object
      self.boundingBox = [Point3D(self.cncPaths[0].boundingBox[0].X, self.cncPaths[0].boundingBox[0].Y),
                          Point3D(self.cncPaths[0].boundingBox[1].X, self.cncPaths[0].boundingBox[1].Y)]
-     for path in self.cncPaths:
-       print("path.boundingBox: " + str(path.boundingBox))
      for cncPath in self.cncPaths:
        cncPath.DetermineIfBorder(self.cncPaths)
        cncPath.SetConventionalMilling()
@@ -816,8 +814,6 @@ class cncPathsClass:
        self.boundingBox[1].X = max(self.boundingBox[1].X, cncPath.boundingBox[1].X)
        self.boundingBox[1].Y = max(self.boundingBox[1].Y, cncPath.boundingBox[1].Y)
 
-     for path in self.cncPaths:
-       print("AFTER: path.boundingBox: " + str(path.boundingBox))
      #####################################################################
      #Set class variables to those passed in
      #####################################################################
@@ -1110,7 +1106,7 @@ class cncGcodeGeneratorClass:
 #Generate cncPaths object based on svgFile
 cncPaths = cncPathsClass(inputSvgFile   = args.inputSvgFile[0],
                          pointsPerCurve = 30,
-                         distPerTab      = 110,
+                         distPerTab      = 200,
                          tabWidth        = float(args.tabWidth[0]),
                          cutterDiameter  = float(args.cutterDiameter[0])
                         )
