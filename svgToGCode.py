@@ -86,6 +86,12 @@ def lineOrCurveToPoints3D(lineOrCurve, pointsPerCurve):
       complexPoint = lineOrCurve.point(i / (pointsPerCurve - 1.0))
       points3D.append(Point3D(complexPoint.real, complexPoint.imag, None))
     return points3D
+  elif isinstance(lineOrCurve, Arc):
+    points3D = []
+    for i in range(int(pointsPerCurve) * 10):
+      complexPoint = lineOrCurve.point(i / (pointsPerCurve * 10 - 1.0))
+      points3D.append(Point3D(complexPoint.real, complexPoint.imag, None))
+    return points3D
 
   else:
     print("unsuported type: " + str(lineOrCurve))
@@ -112,28 +118,20 @@ def pathToPoints3D(path, pointsPerCurve):
     prevEnd = curPoints3D[-1]
   return points3D
 
-def isPathClockWise(path):
-  #Signed area is negative if clockwise, positive if counter-clockwise
-  if signedArea(path) < 0:
-    return True
-  else:
-    return False
+#def isPathClockWise(path):
+#  #Signed area is negative if clockwise, positive if counter-clockwise
+#  if signedArea(path) < 0:
+#    return True
+#  else:
+#    return False
 
-def signedArea(path, pointsPerCurve):
-  prevPoint = path[-1][0]
+def signedArea(points3D):
+  prevPoint = points3D[-1]
   signedArea = 0
-  for line in path:
-    if isinstance(line, Line):
-      newPoint = line.bpoints()[0]
-      signedArea += (prevPoint.real * newPoint.imag - newPoint.real * prevPoint.imag)
-      #assume start of line is all needed and end of line is begginging of next start of line...May be bad assumption
-      prevPoint = line.bpoints()[0]
-    elif isinstance(line, CubicBezier):
-      for i in range(int(pointsPerCurve)):
-        newPoint = line.point(i / (pointsPerCurve - 1.0))
-        signedArea += (prevPoint.real * newPoint.imag - newPoint.real * prevPoint.imag)
-        prevPoint = newPoint
-    return signedArea / 2.0
+  for point3D in points3D:
+    signedArea += (prevPoint.X * point3D.Y - point3D.X * prevPoint.Y)
+    prevPoint = point3D
+  return signedArea / 2.0
 
 def findBoundingBox(path):
   bounds = [Point3D(math.inf, math.inf, math.inf), Point3D(-math.inf, -math.inf, -math.inf)]
@@ -239,7 +237,7 @@ class cncPathClass:
     self.YtabLocations = []
 
     #Store information about the path for later use and quick access
-    self.signedArea = signedArea(path, pointsPerCurve)
+    self.signedArea = signedArea(self.points3D)
     self.isClockWise = self.signedArea > 0
     self.boundingBox = findBoundingBox(path)
     print("    BOUNDING BOX: " + str(self.boundingBox))
@@ -386,19 +384,31 @@ class cncPathClass:
     if (self.isBorder and not self.isClockWise) or (not self.isBorder and self.isClockWise):
       self.points3D = self.points3D[::-1]
   
+  def PointWithinTab(self, point):
+    for tabs in [self.XtabLocations, self.YtabLocations]:
+      for tab in tabs:
+        if point.distanceXY(tab) <= (self.tabWidth + self.cutterDiameter) / 2.0:
+          return True
+    return False
+
   def ModifyPointsFromTabLocations(self):
     #########################################################
     #Cycle through the points in the cncPath to add in points at tab border and indidate part of a tab
     #########################################################
+    print("ModifyPointsFromTabLocations: " + str(self.XtabLocations))
     prevPoint3D = self.points3D[0]
     i = 0
     while i < len(self.points3D):
       point3D = self.points3D[i]
       allTabIntersections = self.lineTabIntersections(prevPoint3D, point3D)
+      #if point is within a tab, then mark it as a tab
+      if self.PointWithinTab(point3D):
+        print("within tab: " + str(point3D))
+        self.pointIsTab[i] = True
       #itterate through list of intersections within a single tab
       for tabIntersections in allTabIntersections:
         if len(tabIntersections) == 2:
-          #print("2 tabIntersections")
+          print("2 tabIntersections")
           #move to edge of tab
           self.pointIsTab.insert(i, True)
           self.points3D.insert(i, tabIntersections[0])
@@ -408,16 +418,18 @@ class cncPathClass:
           self.points3D.insert(i, tabIntersections[1])
           i = i + 1
         elif len(tabIntersections) == 1:
-          #print("1 intersection")
+          print("1 intersection")
           #move to edge of tab
           self.pointIsTab.insert(i, True)
           self.points3D.insert(i, tabIntersections[0])
           i = i + 1
+        print(tabIntersections)
         #If no tabIntersections with tab, just continue on like normal from point to point
       i = i + 1
       prevPoint3D = point3D
       #print(i)
     #print("END: length" + str(len(self.points3D)))
+    
 
   def calculateIdealTabLocations(self):
     #Must be run after a path is determined if it is a border or not
@@ -451,13 +463,13 @@ class cncPathClass:
     if self.color[1] != 0:
       return
     self.XtabLocations.append(location)
-    #print("added Tab: " + str(location) + "NumTabs: " + str(len(self.XtabLocations)))
+    print("added Tab: " + str(location) + "NumTabs: " + str(len(self.XtabLocations)))
 
   def addYTab(self, location):
     if self.color[1] != 0:
       return
     self.YtabLocations.append(location)
-    #print("************added Tab: " + str(location) + "NumTabs: " + str(len(self.YtabLocations)))
+    print("************added Tab: " + str(location) + "NumTabs: " + str(len(self.YtabLocations)))
   
   def XTabOnMaxSide(self, l1):
     midY = (self.boundingBox[0].Y + self.boundingBox[1].Y) / 2.0
@@ -551,6 +563,7 @@ class cncPathClass:
           prevPoint = point
 
   def addXTabsIfAdjacentTab(self, cncPaths):
+    print("addXTabsIfAdjacentTab")
     for cncPath in cncPaths:
       #Only check for adjacent tabs for other paths than self
       if cncPath == self or cncPath.isBorder == False:
@@ -590,6 +603,7 @@ class cncPathClass:
     bestTabLocation = None
     prevPoint = self.points3D[-1]
     maxScore = -100000000000000000
+    print("TAB START: ", str(location))
     for point in self.points3D:
       #Sweep the tab from beginning spacing to end spacing to find ideal location
       pointsToTry = 20.0
@@ -603,17 +617,25 @@ class cncPathClass:
           candPoint = Point3D(XTabPosition, point.Y)
 
           #hScore is highest at ideal location, starts falling off at outer locations
-          hScore = 1 - abs(location.X - candPoint.X) / self.distPerTab
+          hScore =  1 - abs(location.X - candPoint.X) / self.distPerTab
           #vScore is higest at outside of bounding box, smallest at center of bounding box
           bBoxMiddle = (self.boundingBox[1].Y + self.boundingBox[0].Y) / 2.0
           bBoxWidth  = max(0.1, (self.boundingBox[1].Y - self.boundingBox[0].Y))
           vScore = (candPoint.Y - bBoxMiddle) / bBoxWidth
+          print("      CandPoint" + str(candPoint) + " boxMiddle" + str(bBoxMiddle) + " boxWidth" + str(bBoxWidth) + " boundingBox: " + str(self.boundingBox))
           if not locationOnMaxSide:
             vScore = -vScore
           tabWidthAtMaterial = self.tabWidth + self.cutterDiameter
-          tabNearCornerScore = min(distanceXY(candPoint, prevPoint) / (tabWidthAtMaterial / 2.0), distanceXY(candPoint, point) / (tabWidthAtMaterial / 2.0), 1.0)
+          tabNearCornerScore = min(distanceXY(candPoint, prevPoint) / (tabWidthAtMaterial / 2.0), distanceXY(candPoint, point) / (tabWidthAtMaterial / 2.0))
+          print("      tabNearCornerScore: " + str(tabNearCornerScore))
+          #Penalize heavily tab that is not completely away from a corner
+          if tabNearCornerScore < 1:
+            tabNearCornerScore = tabNearCornerScore / 10
+          else:
+            tabNearCornerScore = 1
           #tabNearCornerScore = 1
           score = hScore * vScore * tabNearCornerScore
+          print("    score: " + str(score) + " hScore: " + str(hScore) + " vScore: " + str(vScore) + " tabNearCornerScore: " + str(tabNearCornerScore))
           
           if bestTabLocation == None or score > maxScore:
             #print("****************Best found")
@@ -621,7 +643,7 @@ class cncPathClass:
             #print(bBoxWidth)
             #print(candPoint.imag)
             #print(locationOnMaxSide)
-            #print("score: " + str(score) + " location: " + str(candPoint))
+            print("    Best above: " + str(candPoint))
             bestTabLocation = candPoint
             maxScore = score
       prevPoint = point
@@ -657,7 +679,11 @@ class cncPathClass:
 
           #only need to be half distance of tab from corner as tab position is in middle of the tab
           tabWidthAtMaterial = self.tabWidth + self.cutterDiameter
-          tabNearCornerScore = min(distanceXY(candPoint, prevPoint) / (tabWidthAtMaterial / 2.0), distanceXY(candPoint, point) / (tabWidthAtMaterial / 2.0), 1.0)
+          tabNearCornerScore = min(distanceXY(candPoint, prevPoint) / (tabWidthAtMaterial / 2.0), distanceXY(candPoint, point) / (tabWidthAtMaterial / 2.0))
+          if tabNearCornerScore < 1:
+            tabNearCornerScore = tabNearCornerScore / 10
+          else:
+            tabNearCornerScore = 1
           score = hScore * vScore * tabNearCornerScore
           if bestTabLocation == None or score > maxScore:
             #print("score: " + str(score) + " location: " + str(candPoint))
@@ -693,12 +719,12 @@ class cncPathClass:
       
       if maxPoint != None:
         actualLocation = self.idealToActualXTabLocation(maxPoint, True)
-        #print("idealX:" + str(maxPoint) + "actual: " + str(actualLocation))
+        print("idealX:" + str(maxPoint) + "actual: " + str(actualLocation))
         #print()
         self.addXTabIfNoneAlready(actualLocation)
       if minPoint != None and maxPoint != minPoint:
         actualLocation = self.idealToActualXTabLocation(minPoint, False)
-        #print("idealX:" + str(minPoint) + "actual: " + str(actualLocation))
+        print("idealX:" + str(minPoint) + "actual: " + str(actualLocation))
         #print()
         self.addXTabIfNoneAlready(actualLocation)
 
@@ -759,7 +785,7 @@ class cncPathsClass:
      #print()
      #print()
      #print(colors)
-     #print(paths)
+     print(paths)
          
      self.attributes = attributes
      self.svg_attributes = svg_attributes
@@ -775,7 +801,12 @@ class cncPathsClass:
      #Now that all cncPaths are created, determine which ones are borders or holes, 
      #set milling direction, keep track of total bounding box
      #####################################################################
-     self.boundingBox = self.cncPaths[0].boundingBox[:] #copy contents of list rather than reference
+     #self.boundingBox =      self.cncPaths[0].boundingBox[:] #copy contents of list rather than reference
+     #Create new bounding box object
+     self.boundingBox = [Point3D(self.cncPaths[0].boundingBox[0].X, self.cncPaths[0].boundingBox[0].Y),
+                         Point3D(self.cncPaths[0].boundingBox[1].X, self.cncPaths[0].boundingBox[1].Y)]
+     for path in self.cncPaths:
+       print("path.boundingBox: " + str(path.boundingBox))
      for cncPath in self.cncPaths:
        cncPath.DetermineIfBorder(self.cncPaths)
        cncPath.SetConventionalMilling()
@@ -785,11 +816,14 @@ class cncPathsClass:
        self.boundingBox[1].X = max(self.boundingBox[1].X, cncPath.boundingBox[1].X)
        self.boundingBox[1].Y = max(self.boundingBox[1].Y, cncPath.boundingBox[1].Y)
 
+     for path in self.cncPaths:
+       print("AFTER: path.boundingBox: " + str(path.boundingBox))
      #####################################################################
      #Set class variables to those passed in
      #####################################################################
      self.pointsPerCurve = pointsPerCurve
      self.distPerTab = distPerTab
+     self.tabWidth = tabWidth
   def ToSvgFile(self, fileName):
     print("Saving cut paths to: " + fileName)
     paths = []
@@ -824,6 +858,8 @@ class cncPathsClass:
     wsvg(paths, attributes=attributes, svg_attributes=self.svg_attributes, filename=fileName)
   def orderCncHolePathsFirst(self):
     print("Order CNC Hole Paths First")
+    for path in self.cncPaths:
+      print("path.boundingBox: " + str(path.boundingBox))
     #Order cuts from inside holes to outside paths
     orderedPaths = []
     for path in self.cncPaths:
@@ -855,7 +891,11 @@ class cncPathsClass:
       path.ModifyPointsFromTabLocations()
 
   def addTabs(self):
+    if self.tabWidth == 0:
+      return
     print("Adding Tabs")
+    for path in self.cncPaths:
+      print("path.boundingBox: " + str(path.boundingBox))
     sortedByWidth = sorted(self.cncPaths, key=lambda x: x.width)
     sortedByHeight = sorted(self.cncPaths, key=lambda x: x.height)
     i = 0
@@ -867,10 +907,19 @@ class cncPathsClass:
       #print("**********************************************")
       i += 1
       #Starting with smallest add tabs where none already
+      print()
+      print()
+      print()
+      print()
+      print("path.boundingBox: " + str(path.boundingBox))
       path.addXTabsWhereNoneAlread()
       #after adding tabs to each part, add adjacent tabs to a given part so the tab has something to hold on to
       #print("   Adding tabs for adacent paths")
       for path2 in sortedByWidth:
+        print()
+        print()
+        print()
+        print("path2.boundingBox: " + str(path2.boundingBox))
         #don't do it for current path
         if path != path2:
           path2.addXTabsIfAdjacentTab(self.cncPaths)
@@ -1000,6 +1049,8 @@ class cncGcodeGeneratorClass:
         if cncPath.isPointTabStart(i):
           totalDistance = 0
           nextCutDistance = cutSpacing
+          lastCutLocation = cncPath.points3D[i]
+
           #print("****************Tab start******************")
           #print(cncPath.points3D[i])
 
@@ -1008,15 +1059,16 @@ class cncGcodeGeneratorClass:
           totalDistance = totalDistance + distanceXY(cncPath.points3D[i - 1], cncPath.points3D[i])
           startPoint = cncPath.points3D[i -1]
           #print("totalDistance: " + str(totalDistance))
+          #print("nextCutDistance: " + str(nextCutDistance))
           while totalDistance > nextCutDistance:
-            cutLocation = lineCircleIntersections(startPoint, cncPath.points3D[i], startPoint, cutSpacing * 2.0)
-            #print("cutLocation: " + str(cutLocation) + " startPoint: " + str(startPoint) + " endPoint: " + str(cncPath.points3D[i]))
-            #print("nextCutDistance: " + str(nextCutDistance))
+            cutLocation = lineCircleIntersections(startPoint, cncPath.points3D[i], lastCutLocation, cutSpacing * 2.0)
+            #print("     cutLocation: " + str(cutLocation) + " startPoint: " + str(startPoint) + " endPoint: " + str(cncPath.points3D[i]))
             #print()
             if len(cutLocation) == 1:
               cutLocation = cutLocation[0]
               self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial, 0.5)
               startPoint = cutLocation
+              lastCutLocation = cutLocation
 
             nextCutDistance = nextCutDistance + cutSpacing
     #At end of cutting tabs go back to a safe height
