@@ -563,7 +563,7 @@ class cncPathClass:
           prevPoint = point
 
   def addXTabsIfAdjacentTab(self, cncPaths):
-    print("addXTabsIfAdjacentTab")
+    #print("addXTabsIfAdjacentTab")
     for cncPath in cncPaths:
       #Only check for adjacent tabs for other paths than self
       if cncPath == self or cncPath.isBorder == False:
@@ -854,8 +854,6 @@ class cncPathsClass:
     wsvg(paths, attributes=attributes, svg_attributes=self.svg_attributes, filename=fileName)
   def orderCncHolePathsFirst(self):
     print("Order CNC Hole Paths First")
-    for path in self.cncPaths:
-      print("path.boundingBox: " + str(path.boundingBox))
     #Order cuts from inside holes to outside paths
     orderedPaths = []
     for path in self.cncPaths:
@@ -890,8 +888,6 @@ class cncPathsClass:
     if self.tabWidth == 0:
       return
     print("Adding Tabs")
-    for path in self.cncPaths:
-      print("path.boundingBox: " + str(path.boundingBox))
     sortedByWidth = sorted(self.cncPaths, key=lambda x: x.width)
     sortedByHeight = sorted(self.cncPaths, key=lambda x: x.height)
     i = 0
@@ -903,19 +899,14 @@ class cncPathsClass:
       #print("**********************************************")
       i += 1
       #Starting with smallest add tabs where none already
-      print()
-      print()
-      print()
-      print()
-      print("path.boundingBox: " + str(path.boundingBox))
       path.addXTabsWhereNoneAlread()
       #after adding tabs to each part, add adjacent tabs to a given part so the tab has something to hold on to
       #print("   Adding tabs for adacent paths")
       for path2 in sortedByWidth:
-        print()
-        print()
-        print()
-        print("path2.boundingBox: " + str(path2.boundingBox))
+        #print()
+        #print()
+        #print()
+        #print("path2.boundingBox: " + str(path2.boundingBox))
         #don't do it for current path
         if path != path2:
           path2.addXTabsIfAdjacentTab(self.cncPaths)
@@ -932,7 +923,6 @@ class cncPathsClass:
       #print("   Adding tabs for adacent paths")
       for path2 in sortedByHeight:
         #don't do it for current path
-        #print(path.boundingBox)
         if path != path2:
           path2.addYTabsIfAdjacentTab(self.cncPaths)
 
@@ -1054,12 +1044,10 @@ class cncGcodeGeneratorClass:
         elif cncPath.pointIsTab[i]:
           totalDistance = totalDistance + distanceXY(cncPath.points3D[i - 1], cncPath.points3D[i])
           startPoint = cncPath.points3D[i -1]
-          #print("totalDistance: " + str(totalDistance))
-          #print("nextCutDistance: " + str(nextCutDistance))
+          #if cut distance was exceeded then find exact location of where to cut
           while totalDistance > nextCutDistance:
-            cutLocation = lineCircleIntersections(startPoint, cncPath.points3D[i], lastCutLocation, cutSpacing * 2.0)
-            #print("     cutLocation: " + str(cutLocation) + " startPoint: " + str(startPoint) + " endPoint: " + str(cncPath.points3D[i]))
-            #print()
+            backTrackDistance = totalDistance - nextCutDistance
+            cutLocation = lineCircleIntersections(startPoint, cncPath.points3D[i], cncPath.points3D[i], backTrackDistance * 2.0)
             if len(cutLocation) == 1:
               cutLocation = cutLocation[0]
               self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial, 0.5)
