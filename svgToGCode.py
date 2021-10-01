@@ -1050,7 +1050,11 @@ class cncGcodeGeneratorClass:
             cutLocation = lineCircleIntersections(startPoint, cncPath.points3D[i], cncPath.points3D[i], backTrackDistance * 2.0)
             if len(cutLocation) == 1:
               cutLocation = cutLocation[0]
-              self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial, 0.5)
+              #If first one to cut, rapid traverse at safe height, else just 0.5mm above material
+              if nextCutDistance == cutSpacing:
+                self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial)
+              else:
+                self.moveUpandDownToNextLocation(cutLocation, -self.materialThickness - self.depthBelowMaterial, 0.5)
               startPoint = cutLocation
               lastCutLocation = cutLocation
 
