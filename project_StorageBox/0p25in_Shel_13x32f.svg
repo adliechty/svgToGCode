@@ -136,19 +136,19 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      x="196.85001"
      y="-144.675" />
   <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
      id="rect1444-2"
-     width="370.33481"
-     height="267.03192"
-     x="0.5"
-     y="-301.79099"
+     width="370.33014"
+     height="269.52734"
+     x="0.50232768"
+     y="-304.28873"
      transform="rotate(90)" />
   <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
      id="rect1444-2-1"
-     width="370.33481"
-     height="267.03192"
-     x="370.83481"
-     y="-301.79099"
+     width="370.33014"
+     height="269.52734"
+     x="370.83713"
+     y="-304.28873"
      transform="rotate(90)" />
 </svg>

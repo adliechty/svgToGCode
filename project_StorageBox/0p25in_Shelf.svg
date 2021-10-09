@@ -30,8 +30,8 @@
      id="namedview934"
      showgrid="false"
      inkscape:zoom="0.125"
-     inkscape:cx="2579.9999"
-     inkscape:cy="1476"
+     inkscape:cx="1964"
+     inkscape:cy="1076"
      inkscape:window-x="-8"
      inkscape:window-y="18"
      inkscape:window-maximized="1"
@@ -131,45 +131,45 @@ SettingsUrl: http://www.festi.info/TypeTray?FingerJoint_angle=90.0&amp;FingerJoi
      x="175.68333"
      y="199.08334" />
   <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
-     id="rect1444"
-     width="370.33481"
-     height="267.03192"
-     x="76.699997"
-     y="0.5" />
-  <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
      id="rect1444-2"
-     width="370.33481"
-     height="267.03192"
-     x="447.03482"
-     y="0.5" />
+     width="370.33014"
+     height="269.52734"
+     x="447.03714"
+     y="0.50232768" />
   <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
-     id="rect1444-9"
-     width="370.33481"
-     height="267.03192"
-     x="76.700005"
-     y="267.53189" />
-  <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
      id="rect1444-2-5"
-     width="370.33481"
-     height="267.03192"
-     x="447.03482"
-     y="267.53189" />
+     width="370.33014"
+     height="269.52734"
+     x="447.03714"
+     y="270.02966" />
   <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
-     id="rect1444-0"
-     width="370.33481"
-     height="267.03192"
-     x="76.699997"
-     y="534.5639" />
-  <rect
-     style="fill:none;stroke:#000000;stroke-width:1"
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
      id="rect1444-2-7"
-     width="370.33481"
-     height="267.03192"
-     x="447.03482"
-     y="534.5639" />
+     width="370.33014"
+     height="269.52734"
+     x="447.03714"
+     y="539.55701" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
+     id="rect1444-2-9"
+     width="370.33014"
+     height="269.52734"
+     x="76.707001"
+     y="0.50231934" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
+     id="rect1444-2-5-4"
+     width="370.33014"
+     height="269.52734"
+     x="76.707001"
+     y="270.02966" />
+  <rect
+     style="fill:none;stroke:#000000;stroke-width:1.00466"
+     id="rect1444-2-7-3"
+     width="370.33014"
+     height="269.52734"
+     x="76.707001"
+     y="539.55701" />
 </svg>
