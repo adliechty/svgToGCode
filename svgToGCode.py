@@ -20,7 +20,7 @@ import re
 from shapely.geometry import Point, LineString, MultiPoint
 from shapely.geometry.polygon import Polygon
 
-from pygcode import GCodeRapidMove, GCodeFeedRate, GCodeLinearMove
+from pygcode import GCodeRapidMove, GCodeFeedRate, GCodeLinearMove, GCodeUseMillimeters
 
 import argparse
 from copy import deepcopy
@@ -944,6 +944,7 @@ class cncGcodeGeneratorClass:
     self.tabHeight          = tabHeight
 
     self.gCodes = []
+    self.gCodes.append(GCodeUseMillimeters())
     #Set the feed rate at the begining of the program
     self.gCodes.append(GCodeFeedRate(cutFeedRate))
     #Move to the safe Z height as the first move
