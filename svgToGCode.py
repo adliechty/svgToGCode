@@ -15,6 +15,7 @@ import numpy as np
 import math
 import os
 import re
+import sys
 
 #Imports to determine if a point is within a polygon
 from shapely.geometry import Point, LineString, MultiPoint

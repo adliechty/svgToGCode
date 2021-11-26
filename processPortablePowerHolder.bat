@@ -1,0 +1,1 @@
+python .\svgToGCode.py --inputSvgFile project_PortablePowerHolder\PortablePower.svg          --materialThickness 10.795 --depthBelowMaterial 1.0 --depthPerPass 4.0 --cutFeedRate 2560 --safeHeight 25 --tabHeight 3 --cutterDiameter 6.35 --tabWidth 6.35
