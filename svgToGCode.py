@@ -134,11 +134,9 @@ def signedArea(points3D):
     prevPoint = point3D
   return signedArea / 2.0
 
-def findBoundingBox(path):
+def findBoundingBox(points3D):
   bounds = [Point3D(math.inf, math.inf, math.inf), Point3D(-math.inf, -math.inf, -math.inf)]
-  for line in path:
-    points3D = lineOrCurveToPoints3D(line, 10)
-    for point3D in points3D:
+  for point3D in points3D:
       bounds[0].X = min(bounds[0].X, point3D.X)
       bounds[0].Y = min(bounds[0].Y, point3D.Y)
       bounds[1].X = max(bounds[1].X, point3D.X)
@@ -229,7 +227,12 @@ class cncPathClass:
   #CNC class needs to know all the paths in file to know what is a hole and not.
 
   def __init__(self, path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter):
-    self.points3D = pathToPoints3D(path, pointsPerCurve)
+    # if already a list of Point3D, then don't convert
+    if isinstance(path[0], Point3D):
+      self.points3D = path
+    else:
+      self.points3D = pathToPoints3D(path, pointsPerCurve)
+
     self.color = color
     self.pointIsTab = [False] * len(self.points3D)
     #A point is not a tab unless otherwise specified.  Tabs will consist of two adjacent points width of the tab
@@ -240,7 +243,7 @@ class cncPathClass:
     #Store information about the path for later use and quick access
     self.signedArea = signedArea(self.points3D)
     self.isClockWise = self.signedArea > 0
-    self.boundingBox = findBoundingBox(path)
+    self.boundingBox = findBoundingBox(self.points3D)
     print("    BOUNDING BOX: " + str(self.boundingBox))
     self.height = self.boundingBox[1].Y - self.boundingBox[0].Y
     self.width = self.boundingBox[1].X - self.boundingBox[0].X
@@ -766,31 +769,36 @@ class cncPathClass:
 #cncPaths class
 #####################################################################
 class cncPathsClass:
-  def __init__(self, inputSvgFile, pointsPerCurve, distPerTab, tabWidth, cutterDiameter):
+  def __init__(self, pointsPerCurve, distPerTab, tabWidth, cutterDiameter, inputSvgFile = "", points3D = None):
+     # either specify inputSvgFile or points3D, but not both.
      #####################################################################
      #Open specified file
      #####################################################################
-     paths, attributes, svg_attributes = svg2paths2(inputSvgFile)
-     colors = []
+     if inputSvgFile != "":
+         paths, attributes, svg_attributes = svg2paths2(inputSvgFile)
+         colors = []
 
-     for path, attribute in zip(paths, attributes):
-       if 'stroke' in attribute.keys():
-         nextColor = hex_to_rgb(attribute['stroke'])
-       elif 'style' in attribute.keys():
-         match = re.search('stroke:#(\d+)', attribute['style'])
-         if match:
-           nextColor = hex_to_rgb("#" + match.group(1))
-         else:
-           nextColor = (0,0,0)
-       colors.append(list(nextColor))
-     #print()
-     #print()
-     #print(colors)
-     print(paths)
-         
-     self.attributes = attributes
-     self.svg_attributes = svg_attributes
-     print("CNC Paths: " + str(len(paths)))
+         for path, attribute in zip(paths, attributes):
+           if 'stroke' in attribute.keys():
+             nextColor = hex_to_rgb(attribute['stroke'])
+           elif 'style' in attribute.keys():
+             match = re.search('stroke:#(\d+)', attribute['style'])
+             if match:
+               nextColor = hex_to_rgb("#" + match.group(1))
+             else:
+               nextColor = (0,0,0)
+           colors.append(list(nextColor))
+         #print()
+         #print()
+         #print(colors)
+         print(paths)
+             
+         self.attributes = attributes
+         self.svg_attributes = svg_attributes
+         print("CNC Paths: " + str(len(paths)))
+     else:
+         # only one depth supported for now for when passing in points3D
+         colors = [(0,0,0)]
      #####################################################################
      #Create a cncPath out of each svgPath to store the svg path and other information
      #####################################################################
@@ -1096,45 +1104,49 @@ class cncGcodeGeneratorClass:
 #####################################################################
 #Main Code
 #####################################################################
+def main():
+    #Generate cncPaths object based on svgFile
+    cncPaths = cncPathsClass(inputSvgFile   = args.inputSvgFile[0],
+                             pointsPerCurve = 30,
+                             distPerTab      = 200,
+                             tabWidth        = float(args.tabWidth[0]),
+                             cutterDiameter  = float(args.cutterDiameter[0])
+                            )
 
-#Generate cncPaths object based on svgFile
-cncPaths = cncPathsClass(inputSvgFile   = args.inputSvgFile[0],
-                         pointsPerCurve = 30,
-                         distPerTab      = 200,
-                         tabWidth        = float(args.tabWidth[0]),
-                         cutterDiameter  = float(args.cutterDiameter[0])
-                        )
+    #Order cuts from inside holes to outside borders
+    cncPaths.orderCncHolePathsFirst()
+    cncPaths.orderPartialCutsFirst()
 
-#Order cuts from inside holes to outside borders
-cncPaths.orderCncHolePathsFirst()
-cncPaths.orderPartialCutsFirst()
+    cncPaths.addTabs()
+    cncPaths.ModifyPointsFromTabLocations()
 
-cncPaths.addTabs()
-cncPaths.ModifyPointsFromTabLocations()
+    ############################
+    # save cut paths to svg
+    ############################
+    svgPath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_cutPaths")
+    if not os.path.exists(svgPath):
+        os.makedirs(svgPath)
+    cncPaths.ToSvgFile(os.path.join(svgPath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + "_cutPaths.svg")))
 
-############################
-# save cut paths to svg
-############################
-svgPath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_cutPaths")
-if not os.path.exists(svgPath):
-    os.makedirs(svgPath)
-cncPaths.ToSvgFile(os.path.join(svgPath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + "_cutPaths.svg")))
+    cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
+                                               materialThickness  = float(args.materialThickness[0]),
+                                               depthBelowMaterial = float(args.depthBelowMaterial[0]),
+                                               depthPerPass       = float(args.depthPerPass[0]),
+                                               cutFeedRate        = float(args.cutFeedRate[0]),
+                                               safeHeight         = float(args.safeHeight[0]),
+                                               tabHeight          = float(args.tabHeight[0])
+                                              )
+    cncGcodeGenerator.Generate()
+    cncGcodeGenerator.CutTabs()
 
-cncGcodeGenerator = cncGcodeGeneratorClass(cncPaths           = cncPaths,
-                                           materialThickness  = float(args.materialThickness[0]),
-                                           depthBelowMaterial = float(args.depthBelowMaterial[0]),
-                                           depthPerPass       = float(args.depthPerPass[0]),
-                                           cutFeedRate        = float(args.cutFeedRate[0]),
-                                           safeHeight         = float(args.safeHeight[0]),
-                                           tabHeight          = float(args.tabHeight[0])
-                                          )
-cncGcodeGenerator.Generate()
-cncGcodeGenerator.CutTabs()
+    ############################
+    # Save G code
+    ############################
+    gcodePath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode")
+    if not os.path.exists(gcodePath):
+        os.makedirs(gcodePath)
+    cncGcodeGenerator.Save(os.path.join(gcodePath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")))
 
-############################
-# Save G code
-############################
-gcodePath = os.path.join(os.path.dirname(args.inputSvgFile[0]), "output_gcode")
-if not os.path.exists(gcodePath):
-    os.makedirs(gcodePath)
-cncGcodeGenerator.Save(os.path.join(gcodePath, os.path.basename(os.path.splitext(args.inputSvgFile[0])[0] + ".gcode")))
+if __name__ == "__main__":
+   # This gets called when run from command line, and not from import
+   main()
