@@ -796,16 +796,18 @@ class cncPathsClass:
          self.attributes = attributes
          self.svg_attributes = svg_attributes
          print("CNC Paths: " + str(len(paths)))
+         #####################################################################
+         #Create a cncPath out of each svgPath to store the svg path and other information
+         #####################################################################
+         self.cncPaths = []
+         for path, color in zip(paths, colors):
+           self.cncPaths.append(cncPathClass(path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter))
      else:
          # only one depth supported for now for when passing in points3D
-         colors = [(0,0,0)]
-     #####################################################################
-     #Create a cncPath out of each svgPath to store the svg path and other information
-     #####################################################################
-     self.cncPaths = []
-     for path, color in zip(paths, colors):
-       self.cncPaths.append(cncPathClass(path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter))
-
+         color = (0,0,0)
+         self.cncPaths = []
+         self.cncPaths.append(cncPathClass(points3D, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter))
+     
      #####################################################################
      #Now that all cncPaths are created, determine which ones are borders or holes, 
      #set milling direction, keep track of total bounding box
