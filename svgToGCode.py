@@ -21,7 +21,7 @@ import sys
 from shapely.geometry import Point, LineString, MultiPoint
 from shapely.geometry.polygon import Polygon
 
-from pygcode import GCodeRapidMove, GCodeFeedRate, GCodeLinearMove, GCodeUseMillimeters
+from pygcode import GCodeRapidMove, GCodeFeedRate, GCodeLinearMove, GCodeUseMillimeters, GCodeUseInches
 
 import argparse
 from copy import deepcopy
@@ -941,7 +941,7 @@ class cncPathsClass:
 #cncGcodeGenerator class
 #####################################################################
 class cncGcodeGeneratorClass:
-  def __init__(self, cncPaths, materialThickness, depthBelowMaterial, depthPerPass, cutFeedRate, safeHeight, tabHeight):
+  def __init__(self, cncPaths, materialThickness, depthBelowMaterial, depthPerPass, cutFeedRate, safeHeight, tabHeight, useMM):
 
     self.cncPaths      = cncPaths
     #XYZ location undefined at the start
@@ -955,7 +955,10 @@ class cncGcodeGeneratorClass:
     self.tabHeight          = tabHeight
 
     self.gCodes = []
-    self.gCodes.append(GCodeUseMillimeters())
+    if useMM:
+      self.gCodes.append(GCodeUseMillimeters())
+    else:
+      self.gCodes.append(GCodeUseInches())
     #Set the feed rate at the begining of the program
     self.gCodes.append(GCodeFeedRate(cutFeedRate))
     #Move to the safe Z height as the first move
