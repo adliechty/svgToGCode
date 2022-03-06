@@ -76,33 +76,36 @@ def isPointWithinAnyPath(point, cncPaths):
       return True
   return False
 
-def lineOrCurveToPoints3D(lineOrCurve, pointsPerCurve):
+def lineOrCurveToPoints3D(lineOrCurve, pointsPerCurve, convertMmToIn = False):
+  mult = 1.0
+  if convertMmToIn:
+    mult = 1 / 25.4
   if isinstance(lineOrCurve,Line):
     #print(lineOrCurve)
-    return [Point3D(lineOrCurve.bpoints()[0].real, lineOrCurve.bpoints()[0].imag), \
-            Point3D(lineOrCurve.bpoints()[1].real, lineOrCurve.bpoints()[1].imag)]
+    return [Point3D(lineOrCurve.bpoints()[0].real * mult, lineOrCurve.bpoints()[0].imag * mult), \
+            Point3D(lineOrCurve.bpoints()[1].real * mult, lineOrCurve.bpoints()[1].imag * mult)]
   elif isinstance(lineOrCurve, CubicBezier):
     points3D = []
     for i in range(int(pointsPerCurve)):
       complexPoint = lineOrCurve.point(i / (pointsPerCurve - 1.0))
-      points3D.append(Point3D(complexPoint.real, complexPoint.imag, None))
+      points3D.append(Point3D(complexPoint.real * mult, complexPoint.imag * mult, None))
     return points3D
   elif isinstance(lineOrCurve, Arc):
     points3D = []
     for i in range(int(pointsPerCurve) * 10):
       complexPoint = lineOrCurve.point(i / (pointsPerCurve * 10 - 1.0))
-      points3D.append(Point3D(complexPoint.real, complexPoint.imag, None))
+      points3D.append(Point3D(complexPoint.real * mult, complexPoint.imag * mult, None))
     return points3D
 
   else:
     print("unsuported type: " + str(lineOrCurve))
     quit()
 
-def pathToPoints3D(path, pointsPerCurve):
+def pathToPoints3D(path, pointsPerCurve, convertMmToIn = False):
   prevEnd = None
   points3D = []
   for lineOrCurve in path:
-    curPoints3D = lineOrCurveToPoints3D(lineOrCurve, pointsPerCurve)
+    curPoints3D = lineOrCurveToPoints3D(lineOrCurve, pointsPerCurve, convertMmToIn)
     #check that the last line ending starts the beginning of the next line.
     #print(curPoints3D)
     if prevEnd != None and distanceXY(curPoints3D[0], prevEnd) > 0.01:
@@ -226,12 +229,12 @@ class cncPathClass:
   #cncPath is either a hole or border for a contiguous cut
   #CNC class needs to know all the paths in file to know what is a hole and not.
 
-  def __init__(self, path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter):
+  def __init__(self, path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter, convertSvfToIn = False):
     # if already a list of Point3D, then don't convert
     if isinstance(path[0], Point3D):
       self.points3D = path
     else:
-      self.points3D = pathToPoints3D(path, pointsPerCurve)
+      self.points3D = pathToPoints3D(path, pointsPerCurve, convertSvfToIn)
 
     self.color = color
     self.pointIsTab = [False] * len(self.points3D)
@@ -769,7 +772,7 @@ class cncPathClass:
 #cncPaths class
 #####################################################################
 class cncPathsClass:
-  def __init__(self, pointsPerCurve, distPerTab, tabWidth, cutterDiameter, inputSvgFile = "", points3D = None):
+  def __init__(self, pointsPerCurve, distPerTab, tabWidth, cutterDiameter, inputSvgFile = "", points3D = None, convertSvfToIn = False):
      # either specify inputSvgFile or points3D, but not both.
      #####################################################################
      #Open specified file
@@ -801,7 +804,7 @@ class cncPathsClass:
          #####################################################################
          self.cncPaths = []
          for path, color in zip(paths, colors):
-           self.cncPaths.append(cncPathClass(path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter))
+           self.cncPaths.append(cncPathClass(path, color, distPerTab, tabWidth, pointsPerCurve, cutterDiameter, convertSvfToIn))
      else:
          # only one depth supported for now for when passing in points3D
          color = (0,0,0)
