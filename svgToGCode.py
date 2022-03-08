@@ -794,7 +794,7 @@ class cncPathsClass:
          #print()
          #print()
          #print(colors)
-         print(paths)
+         #print(paths)
              
          self.attributes = attributes
          self.svg_attributes = svg_attributes
